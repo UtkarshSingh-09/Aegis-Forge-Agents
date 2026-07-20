@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" fill="none">
+  <defs>
+    <linearGradient id="bg-arch" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A0A0A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111111;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#991B1B" />
+      <stop offset="50%" style="stop-color:#D97706" />
+      <stop offset="100%" style="stop-color:#FBBF24" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="200" fill="url(#bg-arch)" rx="8"/>
+  <rect x="0" y="0" width="1200" height="1" fill="url(#amber)" opacity="0.4"/>
+
+  <!-- Agent Nodes -->
+  <g font-family="'SF Mono', 'Fira Code', monospace" font-size="9" text-anchor="middle">
+    <!-- Node 1: Incident Lead -->
+    <circle cx="150" cy="80" r="28" fill="none" stroke="#D97706" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="150" cy="80" r="24" fill="#D97706" fill-opacity="0.08"/>
+    <text x="150" y="76" fill="#FBBF24" font-size="16">🎙️</text>
+    <text x="150" y="125" fill="#F8FAFC" font-weight="600" font-size="8">INCIDENT</text>
+    <text x="150" y="137" fill="#94A3B8" font-size="7">LEAD</text>
+
+    <!-- Node 2: Pressure -->
+    <circle cx="330" cy="80" r="28" fill="none" stroke="#991B1B" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="330" cy="80" r="24" fill="#991B1B" fill-opacity="0.08"/>
+    <text x="330" y="76" fill="#FBBF24" font-size="16">⚡</text>
+    <text x="330" y="125" fill="#F8FAFC" font-weight="600" font-size="8">PRESSURE</text>
+    <text x="330" y="137" fill="#94A3B8" font-size="7">AGENT</text>
+
+    <!-- Node 3: Observer -->
+    <circle cx="510" cy="80" r="28" fill="none" stroke="#D97706" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="510" cy="80" r="24" fill="#D97706" fill-opacity="0.08"/>
+    <text x="510" y="76" fill="#FBBF24" font-size="16">👁️</text>
+    <text x="510" y="125" fill="#F8FAFC" font-weight="600" font-size="8">OBSERVER</text>
+    <text x="510" y="137" fill="#94A3B8" font-size="7">GRADER</text>
+
+    <!-- Node 4: Mole -->
+    <circle cx="690" cy="80" r="28" fill="none" stroke="#991B1B" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="690" cy="80" r="24" fill="#991B1B" fill-opacity="0.08"/>
+    <text x="690" y="76" fill="#FBBF24" font-size="16">🕵️</text>
+    <text x="690" y="125" fill="#F8FAFC" font-weight="600" font-size="8">MOLE</text>
+    <text x="690" y="137" fill="#94A3B8" font-size="7">INTEGRITY</text>
+
+    <!-- Node 5: Governor -->
+    <circle cx="870" cy="80" r="28" fill="none" stroke="#D97706" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="870" cy="80" r="24" fill="#D97706" fill-opacity="0.08"/>
+    <text x="870" y="76" fill="#FBBF24" font-size="16">🛡️</text>
+    <text x="870" y="125" fill="#F8FAFC" font-weight="600" font-size="8">GOVERNOR</text>
+    <text x="870" y="137" fill="#94A3B8" font-size="7">SAFETY</text>
+
+    <!-- Node 6: Crisis -->
+    <circle cx="1050" cy="80" r="28" fill="none" stroke="#991B1B" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="1050" cy="80" r="24" fill="#991B1B" fill-opacity="0.08"/>
+    <text x="1050" y="76" fill="#FBBF24" font-size="16">🚨</text>
+    <text x="1050" y="125" fill="#F8FAFC" font-weight="600" font-size="8">CRISIS</text>
+    <text x="1050" y="137" fill="#94A3B8" font-size="7">POPUP</text>
+  </g>
+
+  <!-- Connection Lines -->
+  <g stroke="#D97706" stroke-opacity="0.15" stroke-width="1" stroke-dasharray="4,4">
+    <line x1="178" y1="80" x2="302" y2="80"/>
+    <line x1="358" y1="80" x2="482" y2="80"/>
+    <line x1="538" y1="80" x2="662" y2="80"/>
+    <line x1="718" y1="80" x2="842" y2="80"/>
+    <line x1="898" y1="80" x2="1022" y2="80"/>
+  </g>
+
+  <!-- Bottom Label -->
+  <text x="600" y="175" text-anchor="middle" fill="#94A3B8" font-family="'SF Mono', 'Fira Code', monospace" font-size="9" letter-spacing="3">6 AUTONOMOUS AGENTS · SHARED KNOWLEDGE ENGINE · REAL-TIME ORCHESTRATION</text>
+
+  <rect x="0" y="199" width="1200" height="1" fill="url(#amber)" opacity="0.4"/>
+</svg>

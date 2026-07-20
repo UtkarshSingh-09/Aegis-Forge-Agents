@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 220" fill="none">
+  <defs>
+    <linearGradient id="bg-m" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A0A0A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111111;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="amber-m" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#991B1B" />
+      <stop offset="50%" style="stop-color:#D97706" />
+      <stop offset="100%" style="stop-color:#FBBF24" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="220" fill="url(#bg-m)" rx="8"/>
+  <rect x="0" y="0" width="1200" height="1" fill="url(#amber-m)" opacity="0.4"/>
+
+  <g font-family="'SF Mono', 'Fira Code', monospace" text-anchor="middle">
+    <!-- Metric 1 -->
+    <text x="150" y="55" fill="#FBBF24" font-size="38" font-weight="700">6</text>
+    <text x="150" y="80" fill="#F8FAFC" font-size="10" font-weight="600">AI AGENTS</text>
+    <text x="150" y="95" fill="#94A3B8" font-size="8">Simultaneous</text>
+
+    <!-- Metric 2 -->
+    <text x="350" y="55" fill="#D97706" font-size="38" font-weight="700">~850</text>
+    <text x="350" y="80" fill="#F8FAFC" font-size="10" font-weight="600">MS LATENCY</text>
+    <text x="350" y="95" fill="#94A3B8" font-size="8">Round-trip</text>
+
+    <!-- Metric 3 -->
+    <text x="550" y="55" fill="#FBBF24" font-size="38" font-weight="700">6</text>
+    <text x="550" y="80" fill="#F8FAFC" font-size="10" font-weight="600">DOMAINS</text>
+    <text x="550" y="95" fill="#94A3B8" font-size="8">Interview fields</text>
+
+    <!-- Metric 4 -->
+    <text x="750" y="55" fill="#D97706" font-size="38" font-weight="700">FSIR</text>
+    <text x="750" y="80" fill="#F8FAFC" font-size="10" font-weight="600">PDF REPORTS</text>
+    <text x="750" y="95" fill="#94A3B8" font-size="8">Auto-generated</text>
+
+    <!-- Metric 5 -->
+    <text x="950" y="55" fill="#FBBF24" font-size="38" font-weight="700">DQI</text>
+    <text x="950" y="80" fill="#F8FAFC" font-size="10" font-weight="600">SCORING</text>
+    <text x="950" y="95" fill="#94A3B8" font-size="8">FAANG-calibrated</text>
+
+    <!-- Metric 6 -->
+    <text x="1100" y="55" fill="#D97706" font-size="38" font-weight="700">40</text>
+    <text x="1100" y="80" fill="#F8FAFC" font-size="10" font-weight="600">MIN MAX</text>
+    <text x="1100" y="95" fill="#94A3B8" font-size="8">Interview length</text>
+  </g>
+
+  <!-- Separator line -->
+  <line x1="50" y1="115" x2="1150" y2="115" stroke="#D97706" stroke-opacity="0.15" stroke-width="0.5"/>
+
+  <!-- Feature Pills -->
+  <g font-family="'SF Mono', 'Fira Code', monospace" font-size="8">
+    <!-- Row 1 -->
+    <rect x="90" y="130" width="160" height="24" rx="12" fill="#D97706" fill-opacity="0.1" stroke="#D97706" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="170" y="146" text-anchor="middle" fill="#D97706">🎙️ Real-Time Voice</text>
+
+    <rect x="270" y="130" width="170" height="24" rx="12" fill="#991B1B" fill-opacity="0.1" stroke="#991B1B" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="355" y="146" text-anchor="middle" fill="#FBBF24">🛡️ Resume Verification</text>
+
+    <rect x="460" y="130" width="180" height="24" rx="12" fill="#D97706" fill-opacity="0.1" stroke="#D97706" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="550" y="146" text-anchor="middle" fill="#D97706">🧠 Dynamic Questions</text>
+
+    <rect x="660" y="130" width="150" height="24" rx="12" fill="#991B1B" fill-opacity="0.1" stroke="#991B1B" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="735" y="146" text-anchor="middle" fill="#FBBF24">🕵️ Integrity Traps</text>
+
+    <rect x="830" y="130" width="140" height="24" rx="12" fill="#D97706" fill-opacity="0.1" stroke="#D97706" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="900" y="146" text-anchor="middle" fill="#D97706">📊 FSIR Reports</text>
+
+    <!-- Row 2 -->
+    <rect x="200" y="165" width="170" height="24" rx="12" fill="#991B1B" fill-opacity="0.1" stroke="#991B1B" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="285" y="181" text-anchor="middle" fill="#FBBF24">⚡ Crisis Injection</text>
+
+    <rect x="390" y="165" width="175" height="24" rx="12" fill="#D97706" fill-opacity="0.1" stroke="#D97706" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="477" y="181" text-anchor="middle" fill="#D97706">👁️ Behavioral Biometrics</text>
+
+    <rect x="585" y="165" width="155" height="24" rx="12" fill="#991B1B" fill-opacity="0.1" stroke="#991B1B" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="662" y="181" text-anchor="middle" fill="#FBBF24">🤖 Avatar Interview</text>
+
+    <rect x="760" y="165" width="160" height="24" rx="12" fill="#D97706" fill-opacity="0.1" stroke="#D97706" stroke-opacity="0.3" stroke-width="0.5"/>
+    <text x="840" y="181" text-anchor="middle" fill="#D97706">🔐 GitHub OSINT</text>
+  </g>
+
+  <rect x="0" y="219" width="1200" height="1" fill="url(#amber-m)" opacity="0.4"/>
+</svg>
