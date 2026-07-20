@@ -865,10 +865,8 @@ const RoomContent = ({
     const [msgInput, setMsgInput] = useState("");
     const [activePanel, setActivePanel] = useState<ActivePanel>(null);
     const [isRecruiterTakeover, setIsRecruiterTakeover] = useState(false);
-    const messageSeqRef = useRef(0);
 
     const getTimestamp = () => new Date().toLocaleTimeString();
-    const nextMessageId = () => `${Date.now()}-${messageSeqRef.current++}-${Math.random().toString(36).slice(2, 7)}`;
 
     // LISTEN FOR TRANSCRIPTS (Explicit Room Event) - Utkarsh's approach
     const room = useRoomContext();
@@ -897,7 +895,7 @@ const RoomContent = ({
                             return prev; // Ignore duplicate
                         }
                         return [...prev, {
-                            id: nextMessageId(),
+                            id: Date.now().toString(),
                             timestamp: getTimestamp(),
                             sender: data.sender || "SYSTEM",
                             text: data.text
@@ -915,14 +913,14 @@ const RoomContent = ({
                 if (data.type === "INTERVIEW_END") {
                     console.log("[AEGIS] Interview ended signal received:", data.reason);
                     setMessages(prev => [...prev, {
-                        id: nextMessageId(),
+                        id: Date.now().toString(),
                         timestamp: getTimestamp(),
                         sender: "SYSTEM",
                         text: `📋 Interview completed: ${data.reason || "Session ended"}. FSIR Report is being generated...`
                     }]);
                     // Delay to allow backend to generate report
                     setTimeout(() => {
-                        onEndCall();
+                        onInterviewEnd();
                     }, 2000);
                 }
                 // HISTORY SYNC (P2P)
@@ -943,21 +941,9 @@ const RoomContent = ({
                 if (data.type === "HISTORY_SYNC") {
                     if (!hasSyncedHistory && data.history && Array.isArray(data.history)) {
                         console.log("[AEGIS] Received History Sync:", data.history.length, "messages");
-                        const seen = new Set<string>();
-                        const normalized = data.history.map((entry: { id?: string; timestamp?: string; sender?: string; text?: string }, idx: number) => {
-                            let id = String(entry?.id || `history-${idx}`);
-                            while (seen.has(id)) {
-                                id = `${id}-${idx}`;
-                            }
-                            seen.add(id);
-                            return {
-                                id,
-                                timestamp: String(entry?.timestamp || getTimestamp()),
-                                sender: entry?.sender || "SYSTEM",
-                                text: String(entry?.text || "")
-                            } as Message;
-                        });
-                        setMessages(normalized);
+                        // Merge unique messages or just replace? Replace is safer for a full sync.
+                        // But keep our local system init if needed. Let's trust the sync.
+                        setMessages(data.history);
                         setHasSyncedHistory(true);
                     }
                 }
@@ -989,23 +975,13 @@ const RoomContent = ({
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!msgInput.trim()) return;
-        const userText = msgInput.trim();
         setMessages(prev => [...prev, {
-            id: nextMessageId(),
+            id: Date.now().toString(),
             timestamp: getTimestamp(),
             sender: "YOU",
-            text: userText
+            text: msgInput
         }]);
         setMsgInput("");
-
-        // Send typed text to backend agent so it can respond in voice/text.
-        if (room && room.localParticipant) {
-            const payload = JSON.stringify({ type: "USER_MESSAGE", text: userText });
-            const encoder = new TextEncoder();
-            room.localParticipant.publishData(encoder.encode(payload), { reliable: true }).catch((err) => {
-                console.error("[AEGIS] Failed to publish USER_MESSAGE:", err);
-            });
-        }
     };
 
     const handleCodeSubmit = async (code: string, language?: string, output?: string) => {
@@ -1025,7 +1001,7 @@ const RoomContent = ({
 
             // 2. Update Local Log (Use truncated for display)
             setMessages(prev => [...prev, {
-                id: nextMessageId(),
+                id: Date.now().toString(),
                 timestamp: getTimestamp(),
                 sender: "CODE",
                 text: `[${language || 'CODE'}]\n${safeCode}${safeOutput ? `\n\n→ Output: ${safeOutput}` : ''}`
@@ -1046,7 +1022,7 @@ const RoomContent = ({
         } catch (err) {
             console.error('[AEGIS] handleCodeSubmit CRASH PREVENTED:', err);
             setMessages(prev => [...prev, {
-                id: nextMessageId(),
+                id: Date.now().toString(),
                 timestamp: getTimestamp(),
                 sender: "SYSTEM",
                 text: `⚠️ Submission Error: ${err instanceof Error ? err.message : 'Unknown error'}`
@@ -1058,7 +1034,7 @@ const RoomContent = ({
         setIsRecruiterTakeover(true);
         // Add system message about takeover
         setMessages(prev => [...prev, {
-            id: nextMessageId(),
+            id: Date.now().toString(),
             timestamp: getTimestamp(),
             sender: "SYSTEM",
             text: "⚠️ RECRUITER TAKEOVER: Human interviewer has taken control. AI is now paused."
@@ -1159,7 +1135,7 @@ function InterviewRoomContent() {
 
     // Get candidate ID from URL params (passed from dashboard after starting interview)
     const candidateId = searchParams.get('candidate') || 'unknown';
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://f6bd14bc925f.ngrok-free.app";
 
     // Function to download FSIR report from Utkarsh's backend
     const handleDownloadReport = async () => {
@@ -1190,8 +1166,10 @@ function InterviewRoomContent() {
             const a = document.createElement('a');
             a.href = url;
             a.download = `Aegis_Report_${candidateId}.pdf`;
+            document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
 
             console.log("[AEGIS] FSIR report downloaded successfully");
         } catch (error) {
@@ -1228,9 +1206,9 @@ function InterviewRoomContent() {
                 const uniqueRoom = roomParam || `aegis-${Date.now()}`;
                 const username = roleParam === 'recruiter' ? `recruiter-${Date.now()}` : 'candidate';
 
-                console.log("[AEGIS] Joining Room:", uniqueRoom, "as", username, "candidateId:", candidateId);
+                console.log("[AEGIS] Joining Room:", uniqueRoom, "as", username);
 
-                const resp = await fetch(`/api/livekit/token?room=${uniqueRoom}&username=${username}&candidate=${candidateId}`);
+                const resp = await fetch(`/api/livekit/token?room=${uniqueRoom}&username=${username}`);
                 const data = await resp.json();
                 setToken(data.token);
             } catch (e) {
@@ -1389,25 +1367,43 @@ function InterviewRoomContent() {
                     ) : (
                         // CANDIDATE VIEW - Session Ended
                         <div className="max-w-md mx-auto text-center">
-                            <div className="text-[#00E5FF] font-mono text-xl tracking-[0.2em] mb-4">
-                                SESSION CONCLUDED
+                            <div className="text-red-500 font-mono text-2xl tracking-[0.2em] animate-pulse mb-4">
+                                SESSION TERMINATED
                             </div>
-                            <div className="text-zinc-400 font-mono text-sm mb-8 leading-relaxed">
-                                The interview has successfully ended. Aegis is now generating your personalized feedback report.
+                            <div className="text-zinc-500 font-mono text-sm mb-8">
+                                The neural link has been severed. Report generation is in progress.
                             </div>
 
                             <button
-                                onClick={() => window.open(`${API_BASE}/download-feedback/${candidateId}`, "_blank")}
-                                className="px-8 py-3 bg-[#00E5FF] text-black font-mono font-bold tracking-wider hover:bg-[#00E5FF]/80 transition-all rounded shadow-[0_0_20px_rgba(0,229,255,0.3)] flex items-center gap-2 mx-auto mb-6"
+                                onClick={handleDownloadReport}
+                                disabled={isDownloading}
+                                className="px-8 py-3 bg-[#00E5FF] text-black font-mono font-bold tracking-wider hover:bg-[#00E5FF]/80 transition-all rounded shadow-[0_0_20px_rgba(0,229,255,0.3)] flex items-center gap-2 mx-auto mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                VIEW MY FEEDBACK
+                                {isDownloading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        DOWNLOADING...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download className="w-5 h-5" />
+                                        DOWNLOAD FSIR REPORT
+                                    </>
+                                )}
                             </button>
 
-                            {/* Hint for recruiters to switch modes */}
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="text-zinc-600 font-mono text-xs hover:text-white transition-colors"
+                            >
+                                [ RE-INITIALIZE LINK ]
+                            </button>
+
+                            {/* Hint to switch to recruiter mode */}
                             <div className="mt-12 p-4 border border-dashed border-amber-500/30 rounded-lg">
-                                <p className="text-zinc-600 font-mono text-xs mb-2">For Recruiters / Judges:</p>
+                                <p className="text-zinc-600 font-mono text-xs mb-2">For Judges / Recruiters:</p>
                                 <p className="text-amber-400/80 font-mono text-xs">
-                                    Click "SWITCH TO RECRUITER" in the top right to view the technical transcription and FSIR.
+                                    Click "SWITCH TO RECRUITER" in the top right to view transcription
                                 </p>
                             </div>
                         </div>
@@ -1437,7 +1433,7 @@ function InterviewRoomContent() {
             className="h-full w-full"
         >
             <RoomContent
-                onEndCall={handleEndCall}
+                onEndCall={() => setIsSessionEnded(true)}
                 candidateId={candidateId}
                 onInterviewEnd={() => setIsSessionEnded(true)}
             />

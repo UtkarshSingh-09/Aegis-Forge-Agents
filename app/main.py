@@ -108,28 +108,17 @@ async def my_agent(ctx: JobContext):
     scenario_id = "devops-redis-latency"  # Default
     
     metadata = ctx.job.metadata if ctx.job.metadata else ""
-    candidate_id = "unknown_candidate"
     
     if metadata.startswith("audit:"):
-        # Format: "audit:candidate_id:/path/to/audit.json"
-        parts = metadata.split(":", 2)
-        if len(parts) == 3:
-            _, candidate_id, audit_path = parts
-        else:
-            # Fallback for old format
-            audit_path = metadata.replace("audit:", "").strip()
-            # Try to extract candidate_id from filename (e.g., cbca51e2_audit.json)
-            candidate_id = audit_path.split("/")[-1].replace("_audit.json", "")
-            
-        logger.info(f"Loading candidate audit from metadata: {audit_path} (ID: {candidate_id})")
+        # Load resume audit from metadata
+        audit_path = metadata.replace("audit:", "").strip()
+        logger.info(f"Loading candidate audit from metadata: {audit_path}")
         
         if knowledge_engine.load_resume_audit(audit_path):
             candidate = knowledge_engine.get_candidate_context()
-            logger.info(f">>> [DEBUG metadata] get_candidate_context() returns: {candidate}") 
             if candidate:
-                parsed_name = candidate.get('name', 'Candidate')
                 scenario_id = candidate.get('scenario_id', 'devops-redis-latency')
-                logger.info(f">>> Detected field: {candidate.get('field')}, name: {parsed_name}, using scenario: {scenario_id}")
+                logger.info(f">>> Detected field: {candidate.get('field')}, using scenario: {scenario_id}")
     elif metadata:
         # Use metadata as direct scenario ID
         scenario_id = metadata
@@ -158,7 +147,6 @@ async def my_agent(ctx: JobContext):
             
             # Retrieve context (works for both paths)
             candidate = knowledge_engine.get_candidate_context()
-            logger.info(f">>> [DEBUG] get_candidate_context() returns: {candidate}") # [NEW LOG]
             if candidate:
                 # Validate we got real data, not defaults
                 parsed_name = candidate.get('name', 'Candidate')
@@ -223,14 +211,14 @@ async def my_agent(ctx: JobContext):
     # Initialize Audit Logger
     audit_logger = SessionAuditLogger(
         session_id=ctx.job.id,
-        candidate_id=candidate_id
+        candidate_id=ctx.job.metadata or "unknown_candidate"
     )
     audit_logger.log_event("System", "SESSION_START", "Interview session initialized")
     
     # Initialize Questions Logger [NEW]
     questions_logger = QuestionsLogger(
         session_id=ctx.job.id,
-        candidate_name=candidate_id,
+        candidate_name=ctx.job.metadata or "Candidate",
         domain=scenario.domain
     )
     
@@ -667,45 +655,6 @@ async def my_agent(ctx: JobContext):
                     asyncio.create_task(trigger_eval())
                 except Exception as eval_e:
                      logger.error(f"Code Evaluation Trigger failed: {eval_e}") 
-            
-            elif msg_type == "USER_MESSAGE":
-                user_text = str(payload.get("text", "")).strip()
-                if not user_text:
-                    return
-
-                logger.info(f">>> RECEIVED USER_MESSAGE ({len(user_text)} chars)")
-                audit_logger.log_event("Candidate", "TEXT_MESSAGE", user_text)
-
-                try:
-                    session.chat_ctx.add_message(role="user", content=user_text)
-                except Exception as ctx_err:
-                    logger.error(f"Failed to update chat_ctx for USER_MESSAGE: {ctx_err}")
-
-                async def trigger_user_reply():
-                    try:
-                        prompt_ctx = session.chat_ctx.copy()
-                        prompt_ctx.add_message(
-                            role="user",
-                            content="Respond concisely to the candidate's latest message and continue the interview."
-                        )
-                        stream = session.llm.chat(chat_ctx=prompt_ctx)
-
-                        res_text = ""
-                        async for chunk in stream:
-                            if hasattr(chunk, 'choices') and chunk.choices:
-                                if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content:
-                                    res_text += str(chunk.choices[0].delta.content)
-                            elif hasattr(chunk, 'delta') and chunk.delta and chunk.delta.content:
-                                res_text += str(chunk.delta.content)
-
-                        if hasattr(session, 'say') and res_text.strip():
-                            await session.say(res_text.strip(), allow_interruptions=True)
-                        elif hasattr(session, 'say'):
-                            await session.say("I got your message. Please continue.", allow_interruptions=True)
-                    except Exception as reply_err:
-                        logger.error(f"USER_MESSAGE response generation failed: {reply_err}")
-
-                asyncio.create_task(trigger_user_reply())
         except Exception as e:
             logger.error(f"Error processing data packet: {e}")
             
@@ -816,7 +765,7 @@ async def my_agent(ctx: JobContext):
                 print(f"PDF FAILURE: {pdf_err}")
             
             # [NEW] Save Questions Log
-            questions_filename = questions_logger.save_to_file(f"uploads/questions_{questions_logger.candidate_name}.json")
+            questions_filename = questions_logger.save_to_file()
             print(f"Questions log saved: {questions_filename}")
             
         except Exception as e:

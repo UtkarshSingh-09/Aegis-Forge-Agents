@@ -24,7 +24,6 @@ class InterviewPipeline:
         # 1. Executive Block Logic (Inferred from DQI)
         # Fix: DQI schema uses 'overall_score', not 'dqi_score'
         overall_score = dqi_data.get("overall_score", 0)
-        effective_overall_score = overall_score
         rubric = dqi_data.get("rubric_breakdown") or {}
         
         decision = "ADVANCE TO HUMAN INTERVIEW" if overall_score > 7 else "REJECT"
@@ -111,6 +110,14 @@ class InterviewPipeline:
             critical = 0
             unjustified = 0
         
+        dqi = DQIBreakdown(
+            score=int(overall_score * 10) if overall_score <= 10 else int(overall_score),
+            correct_decisions=correct,
+            recoverable_mistakes=mistakes,
+            unjustified_assumptions=unjustified,
+            critical_misses=critical
+        )
+
         # 4. Integrity Signals (from Mole Logs + Candidate Behavior)
         integrity_signals = []
         
@@ -365,8 +372,6 @@ class InterviewPipeline:
             
             # Boost: high MediaPipe scores upgrade borderline decisions
             mp_composite = (eye_contact_score + composure_score + posture_score + fluency_score + engagement_score + authenticity_mp_score) / 6
-            mp_adjustment = max(-1.5, min(1.5, (mp_composite - 5) * 0.25))
-            effective_overall_score = max(0, min(10, overall_score + mp_adjustment))
             if mp_composite >= 8 and overall_score >= 6 and overall_score < 7:
                 decision = "ADVANCE TO HUMAN INTERVIEW — BOOSTED BY BEHAVIORAL"
                 reason = f"UPGRADED: Strong behavioral signals (biometric composite: {mp_composite:.1f}/10) elevated a borderline technical score. " + reason
@@ -386,16 +391,6 @@ class InterviewPipeline:
                 metric="Body Language (MediaPipe)",
                 observation=f"Eye contact: {eye_pct:.0f}%, Fidget rate: {fidget_rate:.1f}/min, Posture: {'good' if posture_score >= 7 else 'fair' if posture_score >= 5 else 'poor'}."
             ))
-
-        # DQI breakdown score includes MediaPipe influence when present.
-        dqi_score_value = int(effective_overall_score * 10) if effective_overall_score <= 10 else int(effective_overall_score)
-        dqi = DQIBreakdown(
-            score=dqi_score_value,
-            correct_decisions=correct,
-            recoverable_mistakes=mistakes,
-            unjustified_assumptions=unjustified,
-            critical_misses=critical
-        )
 
         # Assemble the Final Report
         # Derive role from candidate_id or data
